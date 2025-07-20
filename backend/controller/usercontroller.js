@@ -50,4 +50,38 @@ const getusers=async(req,res)=>{
     }
 }
 
-module.exports = { registeruser,login,getusers }
+const getuserbyemail=async(req,res)=>{
+    try {
+        const email=req.params.email;
+        if(!email){
+            return res.status(400).json({ error: 'email is required' })
+        }
+        const user=await usermodel.findOne({email}).select("-password")
+        if(!user){
+            return res.status(400).json({error:"user not found"})
+        }
+        return res.status(200).json({message:"user fetched",user:user})  
+    } catch (error) {
+        return res.status(500).json({ error: 'internal server error',error:error })
+    }
+}
+
+const updateuser=async(req,res)=>{
+   try {
+      const id=req.params.id;
+      if(!id){
+         return res.status(400).json({ error: 'id is required' })
+      }
+      const updateduser=await usermodel.findByIdAndUpdate(id,req.body,{new:true});
+      if(!updateduser){
+        return res.status(404).json({error:"update failed user not found"})
+      }
+      return res.status(200).json({message:"user updated successfully",user:updateduser})
+   } catch (error) {
+    console.log(error);
+    
+      return res.status(500).json({ error: 'internal server error' })
+   }
+}
+
+module.exports = { registeruser,login,getusers,getuserbyemail,updateuser}
