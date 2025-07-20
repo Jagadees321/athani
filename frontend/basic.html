@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Auth Forms</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            perspective: 1000px;
+        }
+
+        .form-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .form-container.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .auth-form {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .register-form {
+            transform: rotateY(180deg);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .toggle-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-form a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .welcome-container {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .welcome-container h1 {
+            color: #764ba2;
+            margin-bottom: 20px;
+        }
+
+        .welcome-container p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            color: #2ecc71;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container" id="formContainer">
+            <form class="auth-form login-form" id="loginForm">
+                <h2>Login</h2>
+                <div id="loginError" class="error-message"></div>
+                <div id="loginSuccess" class="success-message"></div>
+                <div class="form-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
+                <button type="submit">Login</button>
+                <div class="toggle-form">
+                    Don't have an account? <a id="showRegister">Register</a>
+                </div>
+            </form>
+
+            <form class="auth-form register-form" id="registerForm">
+                <h2>Register</h2>
+                <div id="registerError" class="error-message"></div>
+                <div id="registerSuccess" class="success-message"></div>
+                <div class="form-group">
+                    <input type="text" id="registerUsername" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Password" required>
+                </div>
+                <button type="submit">Register</button>
+                <div class="toggle-form">
+                    Already have an account? <a id="showLogin">Login</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="welcome-container" id="welcomeContainer">
+            <h1>Welcome, <span id="welcomeUsername"></span>!</h1>
+            <p>You have successfully logged in to your account.</p>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formContainer = document.getElementById('formContainer');
+            const showRegister = document.getElementById('showRegister');
+            const showLogin = document.getElementById('showLogin');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const welcomeContainer = document.getElementById('welcomeContainer');
+            const welcomeUsername = document.getElementById('welcomeUsername');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const loginError = document.getElementById('loginError');
+            const loginSuccess = document.getElementById('loginSuccess');
+            const registerError = document.getElementById('registerError');
+            const registerSuccess = document.getElementById('registerSuccess');
+
+            // Toggle between login and register forms
+            showRegister.addEventListener('click', function(e) {
+                e.preventDefault();
+                formContainer.classList.add('flipped');
+            });
+
+            showLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                formContainer.classList.remove('flipped');
+            });
+
+            // Handle login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+
+                loginError.textContent = '';
+                loginSuccess.textContent = '';
+
+                fetch('http://localhost:4000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'user logged in successfully') {
+                        loginSuccess.textContent = 'Login successful!';
+                        setTimeout(() => {
+                            welcomeUsername.textContent = data.user.username;
+                            formContainer.style.display = 'none';
+                            welcomeContainer.style.display = 'flex';
+                        }, 1000);
+                    } else {
+                        loginError.textContent = data.message || 'Login failed. Please try again.';
+                    }
+                })
+                .catch(error => {
+                    loginError.textContent = 'An error occurred. Please try again.';
+                    console.error('Error:', error);
+                });
+            });
+
+            // Handle register form submission
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('registerUsername').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+
+                registerError.textContent = '';
+                registerSuccess.textContent = '';
+
+                fetch('http://localhost:4000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'user registered successfully') {
+                        registerSuccess.textContent = 'Registration successful! You can now login.';
+                        // Clear form
+                        document.getElementById('registerUsername').value = '';
+                        document.getElementById('registerEmail').value = '';
+                        document.getElementById('registerPassword').value = '';
+                        // Flip back to login form after 2 seconds
+                        setTimeout(() => {
+                            formContainer.classList.remove('flipped');
+                        }, 2000);
+                    } else {
+                        registerError.textContent = data.message || 'Registration failed. Please try again.';
+                    }
+                })
+                .catch(error => {
+                    registerError.textContent = 'An error occurred. Please try again.';
+                    console.error('Error:', error);
+                });
+            });
+
+            // Handle logout
+            logoutBtn.addEventListener('click', function() {
+                welcomeContainer.style.display = 'none';
+                formContainer.style.display = 'block';
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                formContainer.classList.remove('flipped');
+                loginSuccess.textContent = 'You have been logged out.';
+            });
+        });
+    </script>
+</body>
+</html>
