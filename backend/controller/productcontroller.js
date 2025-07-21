@@ -83,4 +83,4 @@ const deleteproduct=async (req,res)=>{
 
 
 
-module.exports={createproduct,getproducts,getproductbyid}
+module.exports={createproduct,getproducts,getproductbyid,updateproduct,deleteproduct}
