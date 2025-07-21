@@ -33,4 +33,20 @@ const getproducts=async(req,res)=>{
     }
 }
 
-module.exports={createproduct,getproducts}
+const getproductbyid=async(req,res)=>{
+    try {
+        let id=req.params.id;
+        if(!id){
+            return res.status(400).json({ error: 'id is required' })
+        }
+        let product=await productmodel.findById(id);
+        if(!product){
+            return res.status(400).json({ error: 'product not found' })
+        }
+        return res.status(200).json({ message: "product fetched successfully", product: product })
+    } catch (error) {
+        return res.status(500).json({ error: 'internal server error' })
+    }
+}
+
+module.exports={createproduct,getproducts,getproductbyid}
