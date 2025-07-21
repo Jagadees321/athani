@@ -6,7 +6,7 @@ const productSchema=new mongoose.Schema({
     description:{type:String,required:true},
     image:{type:String,required:true},
     stock_available:{type:Number,required:true},
-    isactive:{type:Boolean,required:true},
+    isactive:{type:Boolean},
     reviews:[{
         user:{type:mongoose.Schema.Types.ObjectId,ref:'users'},
         rating:{type:Number,required:true},
