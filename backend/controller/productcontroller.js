@@ -49,4 +49,38 @@ const getproductbyid=async(req,res)=>{
     }
 }
 
+const updateproduct=async (req,res)=>{
+    try {
+        let id=req.params.id;
+        if(!id){
+            return res.status(400).json({error:"id is required"})
+        }
+        let updatedproduct=await productmodel.findByIdAndUpdate(id,req.body);
+        if(!updatedproduct){
+            return res.status(404).json({error:"product not found"})
+        }
+        return res.status(200).json({message:"updated successfully",product:updatedproduct})
+    } catch (error) {
+        return res.status(500).json({error:"internal server error"})
+    }
+}
+
+const deleteproduct=async (req,res)=>{
+    try {
+        let id=req.params.id;
+        if(!id){
+            return res.status(400).json({error:"id is required"})
+        }
+        let deletedproduct=await productmodel.findByIdAndDelete(id);
+        if(!deletedproduct){
+            return res.status(404).json({error:"product not found"})
+        }
+        return res.status(200).json({message:"updated successfully",product:deletedproduct})
+    } catch (error) {
+        return res.status(500).json({error:"internal server error"})
+    }
+}
+
+
+
 module.exports={createproduct,getproducts,getproductbyid}
