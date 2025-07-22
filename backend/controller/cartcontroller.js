@@ -37,14 +37,48 @@ const getcartsofuser=async(req,res)=>{
         if(!user){
             return res.status(400).json({ error: 'user not found' })
         }
-        let cart=await cartmodel.find({userid});
-        if(!cart){
-            return res.status(400).json({ error: 'cart not found' })
-        }
+        let cart=await cartmodel.find({userid}).populate('userid','-password').populate('productid');
+       
+        
         return res.status(200).json({ message: "cart fetched successfully", cart: cart })
         
     } catch (error) {
         return res.status(500).json({ error: 'internal server error' })
     }
 }
-module.exports={addtocart,getcartsofuser}
+
+const updatecart=async(req,res)=>{
+    try {
+        const cartid=req.params.cartid;
+        const quantity=req.params.quantity || 1;
+        if(!cartid){
+            return res.status(400).json({error:'cartid required'})
+        }
+
+        let updatedcart=await cartmodel.findByIdAndUpdate(cartid,{quantity})
+        if(!updatecart){
+            return res.status(404).json({error:'cart not found'})
+        }
+        return res.status(200).json({message:"cart updated successfully",cart:updatedcart})
+    } catch (error) {
+        return res.status(500).json({error:"internal server error"})
+    }
+}
+
+const deletecart=async(req,res)=>{
+     try {
+        const cartid=req.params.cartid;
+        if(!cartid){
+            return res.status(400).json({error:'cartid required'})
+        }
+        let deletedcart=await cartmodel.findByIdAndDelete(cartid);
+        if(!deletedcart){
+            return res.status(404).json({error:'cart not found'})
+        }
+        return res.status(200).json({message:"cart deleted successfully",cart:deletedcart})
+     } catch (error) {
+        return res.status(500).json({error:"internal server error"})
+     }
+}
+
+module.exports={addtocart,getcartsofuser,updatecart,deletecart}
