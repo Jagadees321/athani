@@ -27,4 +27,24 @@ const addtocart=async(req,res)=>{
     }
 }
 
-module.exports={addtocart}
+const getcartsofuser=async(req,res)=>{
+    try {
+        let userid=req.params.id;
+        if(!userid){
+            return res.status(400).json({ error: 'userid is required' })
+        }
+        let user=await usermodel.findById(userid);
+        if(!user){
+            return res.status(400).json({ error: 'user not found' })
+        }
+        let cart=await cartmodel.find({userid});
+        if(!cart){
+            return res.status(400).json({ error: 'cart not found' })
+        }
+        return res.status(200).json({ message: "cart fetched successfully", cart: cart })
+        
+    } catch (error) {
+        return res.status(500).json({ error: 'internal server error' })
+    }
+}
+module.exports={addtocart,getcartsofuser}
