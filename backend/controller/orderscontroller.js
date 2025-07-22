@@ -1,0 +1,71 @@
+const ordersmodel=require("../model/ordermodel")
+const productmodel=require("../model/productmodel")
+const usermodel=require("../model/usermodel");
+const cartmodel=require("../model/cartmodel")
+
+const createorder=async(req,res)=>{
+    try {
+        const {userid,productid,quantity,paymentmode,shippingaddress,status}=req.body;
+        if(!userid || !paymentmode || !shippingaddress || !status){
+            return res.status(400).json({ error: 'userid,paymentmode,shippingaddress,deliverydate,orderdate,status are required' })
+        }
+        let user=await usermodel.findById(userid);
+        if(!user){
+            return res.status(400).json({ error: 'user not found' })
+        }
+        if(productid && quantity){
+           let product=await productmodel.findById(productid);
+           if(!product){
+               return res.status(400).json({ error: 'product not found' })
+           }
+           if(product.stock_available>=quantity){
+              let totalamount=product.price*quantity;
+              let neworderobj={
+                     userid:userid,
+                     products:[{
+                         productid:productid,
+                         quantity:quantity
+                     }],
+                     totalamount:totalamount,
+                     paymentmode:paymentmode,
+                     shippingaddress:shippingaddress,
+                    
+                     status:status
+              }
+              let neworder=new ordersmodel(neworderobj);
+              await neworder.save();
+              return res.status(200).json({ message: "order created successfully", order: neworder })
+
+           }else{
+               return res.status(400).json({ error: 'product stock not available' })
+           }  
+        }else{
+             let products=await cartmodel.find({userid}).populate('productid');
+             let totalamount=0;
+             products=products.map((product)=>{
+                 totalamount+=product.productid.price*product.quantity;
+                 return{
+                     productid:product.productid._id,
+                     quantity:product.quantity
+                 }
+             })
+             let neworderobj={
+                     userid:userid,
+                     products:products,
+                     totalamount:totalamount,
+                     paymentmode:paymentmode,
+                     shippingaddress:shippingaddress,
+                     status:status
+              }
+              let neworder=new ordersmodel(neworderobj);
+              await neworder.save();
+              return res.status(200).json({ message: "order created successfully", order: neworder })
+        }
+
+    } catch (error) {
+        console.log(error);
+        
+        return res.status(500).json({ error: 'internal server error' })
+    }
+}
+module.exports={createorder}
