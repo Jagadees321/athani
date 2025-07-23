@@ -68,4 +68,30 @@ const createorder=async(req,res)=>{
         return res.status(500).json({ error: 'internal server error' })
     }
 }
-module.exports={createorder}
+
+const getallorders=async(req,res)=>{
+    try {
+        let orders=await ordersmodel.find().populate('userid','-password').populate('products.productid');
+        return res.status(200).json({ message: "orders fetched successfully", orders: orders })
+    } catch (error) {
+        return res.status(500).json({ error: 'internal server error' })
+    }
+}
+const getorderhistoryofuser=async(req,res)=>{
+     try {
+        let userid=req.params.userid;
+        if(!userid){
+            return res.status(400).json({ error: 'userid is required' })
+        }
+        let user=await usermodel.findById(userid);
+        if(!user){
+            return res.status(400).json({ error: 'user not found' })
+        }
+        let orders=await ordersmodel.find({userid}).populate('userid','-password').populate('products.productid');
+        return res.status(200).json({ message: "orders fetched successfully", orders: orders }) 
+     } catch (error) {
+         return res.status(500).json({ error: 'internal server error' })
+     }
+}
+
+module.exports={createorder,getallorders,getorderhistoryofuser}
