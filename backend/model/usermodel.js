@@ -5,6 +5,7 @@ const userSchema=new mongoose.Schema({
     password:{type:String,required:true},
     contact:{type:Number},
     isadmin:{type:Boolean},
+    isblocked:{type:Boolean,default:false},
     createdAt:{type:Date,default:Date.now},
     updatedAt:{type:Date,default:Date.now}
 })

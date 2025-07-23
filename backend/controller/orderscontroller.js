@@ -32,8 +32,13 @@ const createorder=async(req,res)=>{
                     
                      status:status
               }
+              if(neworderobj.products.length===0){
+                  return res.status(400).json({ error: 'no product selected' })
+              }
               let neworder=new ordersmodel(neworderobj);
               await neworder.save();
+              let updatedstock=product.stock_available-quantity;
+              await productmodel.findOneAndUpdate(productid,{stock_available:updatedstock})
               return res.status(200).json({ message: "order created successfully", order: neworder })
 
            }else{
@@ -57,8 +62,22 @@ const createorder=async(req,res)=>{
                      shippingaddress:shippingaddress,
                      status:status
               }
+              console.log(neworderobj.products);
+              
+              if(neworderobj.products.length===0){
+                  return res.status(400).json({ error: 'no product in carts' })
+              }
+              //check stockavaible or not
+             for(let i=0;i<neworderobj.products.length;i++){
+                 let product=await productmodel.findById(neworderobj.products[i].productid)
+                 if(product.stock_available<neworderobj.products[i].quantity){
+                     return res.status(400).json({ error: product.productname+' stock not available' })
+                 }
+             }
               let neworder=new ordersmodel(neworderobj);
               await neworder.save();
+              //make cart empty
+              await cartmodel.deleteMany({userid})
               return res.status(200).json({ message: "order created successfully", order: neworder })
         }
 
@@ -94,4 +113,24 @@ const getorderhistoryofuser=async(req,res)=>{
      }
 }
 
-module.exports={createorder,getallorders,getorderhistoryofuser}
+const updateorder=async(req,res)=>{
+    try {
+      let id=req.params.id;
+      if(!id){
+          return res.status(400).json({ error: 'id is required' })
+      }
+      let order=await ordersmodel.findById(id);
+      if(!order){
+          return res.status(400).json({ error: 'order not found' })
+      }
+      let updatedorder=await ordersmodel.findByIdAndUpdate(id,req.body);
+      if(!updatedorder){
+          return res.status(404).json({ error: 'order not found' })
+      }
+      return res.status(200).json({ message: "order updated successfully", order: updatedorder })
+    } catch (error) {
+        return res.status(500).json({ error: 'internal server error' })
+    }
+}
+
+module.exports={createorder,getallorders,getorderhistoryofuser,updateorder}
